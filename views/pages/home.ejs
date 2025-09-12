@@ -9,25 +9,23 @@
 <body>
     <header>
         <nav class="navbar">
-            <div class="navbar-logo">
-                <!-- <span class="logo-icon">📚</span> -->
-                <!-- <span class="logo-text">SwapShelf</span> -->
+            <div class="container">
+                <div class="navbar-content">
+                    <div class="navbar-logo">
+                        <span class="logo-icon">📚</span>
+                        <span class="logo-text">SwapShelf</span>
+                    </div>
+                    <ul class="navbar-menu">
+                        <li><a class="nav-link active" data-page="home" href="#">Home</a></li>
+                        <li><a class="nav-link" data-page="browse" href="#">Browse</a></li>
+                        <li><a class="nav-link" data-page="create" href="#">Share Resource</a></li>
+                        <li><a class="nav-link" data-page="about" href="#">About</a></li>
+                        <li><a class="nav-link" data-page="support" href="#">Support</a></li>
+                        <!-- Admin and Logout links will be injected by JS if admin -->
+                    </ul>
+                    <button class="navbar-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+                </div>
             </div>
-            <!-- <div class="navbar-brand">
-                <a href="#" data-page="home" class="brand-link">
-                    <span class="logo-icon">📚</span>
-                    <span class="logo-text">SwapShelf</span>
-                </a>
-            </div> -->
-            <ul class="navbar-menu">
-                <li><a class="nav-link active" data-page="home" href="#">Home</a></li>
-                <li><a class="nav-link" data-page="browse" href="#">Browse</a></li>
-                <li><a class="nav-link" data-page="create" href="#">Share Resource</a></li>
-                <li><a class="nav-link" data-page="about" href="#">About</a></li>
-                <li><a class="nav-link" data-page="support" href="#">Support</a></li>
-                <!-- Admin and Logout links will be injected by JS if admin -->
-            </ul>
-            <button class="navbar-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
         </nav>
     </header>
 
@@ -36,7 +34,7 @@
         <section class="hero">
             <div class="container">
                 <div class="hero-content">
-                    <h1 class="hero-title">SwapShelf</h1>
+                    <h1 class="hero-title">Academic Resource Exchange</h1>
                     <p class="hero-description">Connect with fellow students to exchange textbooks, notes, and study materials. Make learning more affordable and sustainable.</p>
                     
                     <div class="hero-stats">
@@ -121,10 +119,10 @@
                 <div class="container">
                     <h2 class="page-title">Share Your Resource</h2>
                     
-                    <form id="listing-form" class="listing-form">
-                        <!-- NEW: ISBN Lookup Section -->
+                    <form id="listing-form" class="listing-form" enctype="multipart/form-data">
+                        <!-- ISBN Lookup Section -->
                         <div class="isbn-lookup-section">
-                            <h3>Quick Fill for Books (Optional)</h3>
+                            <h3>📚 Quick Fill for Books (Optional)</h3>
                             <p class="isbn-description">Enter an ISBN to automatically fill book details:</p>
                             <div class="isbn-input-group">
                                 <input 
@@ -136,7 +134,7 @@
                                     maxlength="17"
                                 >
                                 <button type="button" id="isbn-lookup-btn" class="btn btn--secondary">
-                                     Lookup Book
+                                    🔍 Lookup Book
                                 </button>
                             </div>
                             <div class="isbn-help">
@@ -180,6 +178,14 @@
                         <div class="form-group">
                             <label for="description" class="form-label">Description *</label>
                             <textarea id="description" name="description" class="form-textarea" rows="4" placeholder="Describe the condition, contents, and any other relevant details" required></textarea>
+                        </div>
+
+                        <!-- NEW: Image Upload Section -->
+                        <div class="form-group">
+                            <label for="images" class="form-label">Upload Images (Optional)</label>
+                            <input type="file" id="images" name="images" class="form-input image-input" multiple accept="image/*">
+                            <small class="form-help">You can upload up to 5 images. Maximum 5MB per image. Supported formats: JPG, PNG, GIF.</small>
+                            <div id="image-preview" class="image-preview-container"></div>
                         </div>
 
                         <div class="form-row">
@@ -250,19 +256,16 @@
                         <h3>Help us maintain and improve the platform</h3>
                         <div class="support-options">
                             <div class="support-item">
-                                <h4>Donate</h4>
+                                <h4>💝 Donate</h4>
                                 <p>Make a one-time or recurring donation to support our operations.</p>
-                                <button class="btn btn--success" onclick="document.getElementById('donate-modal').classList.remove('hidden')">Donate Now</button>
                             </div>
                             <div class="support-item">
-                                <h4>Spread the Word</h4>
+                                <h4>📢 Spread the Word</h4>
                                 <p>Share SwapShelf with your classmates and study groups.</p>
-                                <button class="btn btn--primary" onclick="navigator.share ? navigator.share({title: 'SwapShelf', text: 'Check out SwapShelf for academic resource exchange!', url: window.location.origin}) : alert('Copy and share: ' + window.location.origin)">Share</button>
                             </div>
                             <div class="support-item">
-                                <h4>Report Issues</h4>
+                                <h4>🐛 Report Issues</h4>
                                 <p>Help us improve by reporting bugs and suggesting features.</p>
-                                <button class="btn btn--error" onclick="window.open('mailto:swapshelf.support@gmail.com?subject=SwapShelf%20Issue%20Report', '_blank')">Report Issue</button>
                             </div>
                         </div>
                     </div>
@@ -310,24 +313,8 @@
             </section>
         </div>
     </main>
-    <!-- Donate Modal Popup -->
-    <div id="donate-modal" class="modal hidden">
-        <div class="modal-backdrop" onclick="document.getElementById('donate-modal').classList.add('hidden')"></div>
-        <div class="modal-content" style="max-width:400px;">
-            <div class="modal-header">
-                <h2>Donate via UPI</h2>
-                <button class="modal-close" onclick="document.getElementById('donate-modal').classList.add('hidden')">×</button>
-            </div>
-            <div class="modal-body" style="text-align:center;">
-                <img src="/images/upi-qr.png" alt="UPI QR Code" style="width:220px;max-width:100%;margin-bottom:16px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
-                <div style="font-size:18px;font-weight:500;margin-bottom:8px;">UPI ID:</div>
-                <div style="font-size:16px;color:#21808d;font-weight:600;user-select:all;">haziqargar42-1@okhdfcbank</div>
-                <p style="margin-top:16px;color:#666;font-size:14px;">Scan the QR code or use the UPI ID above to donate. Thank you for supporting SwapShelf!</p>
-            </div>
-        </div>
-    </div>
 
-    <!-- Modals and Notification (same as the previous file) -->
+    <!-- Modals -->
     <div id="listing-modal" class="modal hidden">
         <div class="modal-backdrop" onclick="app.closeModal()"></div>
         <div class="modal-content">
@@ -409,6 +396,19 @@
         </div>
     </div>
 
+    <!-- Image Lightbox Modal -->
+    <div id="image-lightbox" class="modal hidden">
+        <div class="modal-backdrop" onclick="app.closeLightbox()"></div>
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="app.closeLightbox()">×</button>
+            <img id="lightbox-image" src="" alt="Full size image">
+            <div class="lightbox-nav">
+                <button id="lightbox-prev" onclick="app.prevImage()">‹</button>
+                <button id="lightbox-next" onclick="app.nextImage()">›</button>
+            </div>
+        </div>
+    </div>
+
     <div id="notification" class="notification hidden">
         <div class="notification-content">
             <span id="notification-message">Notification message</span>
@@ -416,11 +416,11 @@
         </div>
     </div>
     
-    <!-- <footer>
+    <footer>
         <div class="container">
             <p style="color:#6b7280; text-align:center; font-size:14px; margin:40px 0 10px;">&copy; 2025 SwapShelf. All rights reserved. | Built for students by students.</p>
         </div>
-    </footer> -->
+    </footer>
 
     <script src="/js/app.js"></script>
 </body>

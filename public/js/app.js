@@ -1,11 +1,27 @@
 // SwapShelf Application JavaScript
 class SwapShelfApp {
+    // Toggle featured status for a listing
+    toggleFeaturedListing(id) {
+        const listings = this.getListings();
+        const idx = listings.findIndex(l => l.id === id);
+        if (idx === -1) return;
+        listings[idx].featured = !listings[idx].featured;
+        this.saveListings(listings);
+        this.loadAdminListings();
+        this.showNotification(
+            listings[idx].featured ? 'Listing marked as featured' : 'Listing unfeatured',
+            'success'
+        );
+    }
     constructor() {
         this.currentPage = 'home';
         this.currentListingId = null;
         this.itemsPerPage = 9;
         this.currentPageNumber = 1;
         this.isAdmin = false;
+        this.selectedImages = [];
+        this.currentLightboxIndex = 0;
+        this.currentLightboxImages = [];
 
         // Initialize when DOM is loaded
         if (document.readyState === 'loading') {
@@ -52,6 +68,7 @@ class SwapShelfApp {
             this.isAdmin = false;
         }
     }
+
 
     // Update navigation based on admin status
     updateNavigation() {
@@ -106,8 +123,9 @@ class SwapShelfApp {
                     location: "Boston, MA",
                     owner_email: "student@example.edu",
                     tags: ["Computer Science", "Algorithms", "Textbook"],
-                    status: "PENDING",
+                    status: "PUBLISHED",
                     featured: true,
+                    images: [], // No sample images
                     created_at: new Date().toISOString()
                 },
                 {
@@ -120,8 +138,9 @@ class SwapShelfApp {
                     location: "New York, NY",
                     owner_email: "mathstudent@university.edu",
                     tags: ["Mathematics", "Calculus", "Study Notes"],
-                    status: "PENDING",
+                    status: "PUBLISHED",
                     featured: false,
+                    images: [],
                     created_at: new Date().toISOString()
                 },
                 {
@@ -136,20 +155,7 @@ class SwapShelfApp {
                     tags: ["Chemistry", "Organic", "Textbook"],
                     status: "PUBLISHED",
                     featured: true,
-                    created_at: new Date().toISOString()
-                },
-                {
-                    id: this.generateId(),
-                    type: "BOOK",
-                    title: "Data Structures and Algorithms",
-                    author_subject: "Michael T. Goodrich",
-                    description: "Essential computer science textbook with comprehensive examples. Excellent condition with minimal wear.",
-                    condition: "Excellent",
-                    location: "Seattle, WA",
-                    owner_email: "csStudent@university.edu",
-                    tags: ["Computer Science", "Programming", "Textbook"],
-                    status: "PUBLISHED",
-                    featured: true,
+                    images: [],
                     created_at: new Date().toISOString()
                 }
             ];
@@ -216,7 +222,7 @@ class SwapShelfApp {
         if (requestForm) requestForm.addEventListener('submit', (e) => this.handleRequestSubmit(e));
         if (adminLoginForm) adminLoginForm.addEventListener('submit', (e) => this.handleAdminLogin(e));
 
-        // ISBN lookup functionality - NEW
+        // ISBN lookup functionality
         const isbnInput = document.getElementById('isbn');
         const lookupBtn = document.getElementById('isbn-lookup-btn');
         if (isbnInput && lookupBtn) {
@@ -227,6 +233,12 @@ class SwapShelfApp {
                     this.lookupISBN();
                 }
             });
+        }
+
+        // Image upload functionality
+        const imageInput = document.getElementById('images');
+        if (imageInput) {
+            imageInput.addEventListener('change', (e) => this.handleImageSelection(e));
         }
 
         // Modals
@@ -249,7 +261,71 @@ class SwapShelfApp {
         window.app = this;
     }
 
-    // NEW: ISBN Lookup functionality
+    // NEW: Handle image selection and preview
+    handleImageSelection(e) {
+        const files = Array.from(e.target.files);
+        const previewContainer = document.getElementById('image-preview');
+        
+        if (files.length > 5) {
+            this.showNotification('Maximum 5 images allowed', 'warning');
+            e.target.value = '';
+            return;
+        }
+
+        // Clear previous previews
+        previewContainer.innerHTML = '';
+        this.selectedImages = [];
+
+        files.forEach((file, index) => {
+            if (file.size > 5 * 1024 * 1024) {
+                this.showNotification(`${file.name} is too large. Maximum 5MB per image.`, 'warning');
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                this.showNotification(`${file.name} is not a valid image file.`, 'warning');
+                return;
+            }
+
+            this.selectedImages.push(file);
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'image-preview-item';
+                previewDiv.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button type="button" class="image-remove-btn" data-index="${index}">×</button>
+                    <span class="image-name">${file.name}</span>
+                `;
+                previewContainer.appendChild(previewDiv);
+
+                // Add remove functionality
+                previewDiv.querySelector('.image-remove-btn').addEventListener('click', () => {
+                    this.removeImage(index);
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // NEW: Remove selected image
+    removeImage(index) {
+        this.selectedImages.splice(index, 1);
+        
+        // Update file input
+        const imageInput = document.getElementById('images');
+        const dt = new DataTransfer();
+        this.selectedImages.forEach(file => dt.items.add(file));
+        imageInput.files = dt.files;
+
+        // Refresh preview
+        const changeEvent = new Event('change');
+        imageInput.dispatchEvent(changeEvent);
+    }
+
+    // ISBN Lookup functionality
     async lookupISBN() {
         const isbnInput = document.getElementById('isbn');
         const isbn = isbnInput.value.trim();
@@ -643,7 +719,9 @@ class SwapShelfApp {
 
     renderAdminListingItem(listing) {
         const statusClass = listing.status.toLowerCase();
-        
+        const imageCount = listing.images ? listing.images.length : 0;
+        const featuredBtnClass = listing.featured ? 'btn--warning' : 'btn--success';
+        const featuredText = listing.featured ? 'Unfeature' : 'Feature';
         return `
             <div class="admin-listing-item">
                 <div class="admin-listing-info">
@@ -652,6 +730,7 @@ class SwapShelfApp {
                         <span class="listing-type">${listing.type}</span>
                         <span class="status status--${statusClass === 'published' ? 'success' : (statusClass === 'pending' ? 'warning' : 'error')}">${listing.status}</span>
                         <span>By: ${listing.owner_email}</span>
+                        <span>Images: ${imageCount}</span>
                         <span>Created: ${this.formatDate(listing.created_at)}</span>
                     </div>
                 </div>
@@ -664,6 +743,7 @@ class SwapShelfApp {
                     ${listing.status === 'PUBLISHED' ? `
                         <button class="btn btn--sm btn--warning" onclick="app.unpublishListing('${listing.id}')">Unpublish</button>
                     ` : ''}
+                    <button class="btn btn--sm ${featuredBtnClass}" onclick="app.toggleFeaturedListing('${listing.id}')">${featuredText}</button>
                     <button class="btn btn--sm btn--error" onclick="app.deleteListing('${listing.id}')">Delete</button>
                 </div>
             </div>
@@ -700,7 +780,7 @@ class SwapShelfApp {
             
             if (listingIndex !== -1) {
                 listings[listingIndex].status = 'PENDING';
-                this.saveListings(listings);
+                this.saveListings(filteredListings);
                 this.loadAdminListings();
                 this.showNotification('Listing unpublished', 'success');
             }
@@ -719,10 +799,13 @@ class SwapShelfApp {
 
     renderListingCard(listing) {
         const featuredClass = listing.featured ? 'featured' : '';
+        const imageCount = listing.images ? listing.images.length : 0;
+        const hasImages = imageCount > 0;
         
         return `
             <div class="listing-card ${featuredClass}" onclick="app.viewListing('${listing.id}')">
                 <div class="listing-type">${listing.type}</div>
+                ${hasImages ? `<div class="listing-image-indicator">📸 ${imageCount}</div>` : ''}
                 <h3 class="listing-title">${listing.title}</h3>
                 <p class="listing-author">${listing.author_subject}</p>
                 <p class="listing-description">${listing.description}</p>
@@ -742,35 +825,54 @@ class SwapShelfApp {
     // Form handling
     resetCreateForm() {
         const form = document.getElementById('listing-form');
-        if (form) form.reset();
+        if (form) {
+            form.reset();
+            // Clear image preview
+            document.getElementById('image-preview').innerHTML = '';
+            this.selectedImages = [];
+        }
     }
 
-    handleListingSubmit(e) {
+    // NEW: Updated form submission with image upload
+    async handleListingSubmit(e) {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        
-        const newListing = {
-            id: this.generateId(),
-            type: formData.get('type'),
-            title: formData.get('title'),
-            author_subject: formData.get('author_subject'),
-            description: formData.get('description'),
-            condition: formData.get('condition'),
-            location: formData.get('location'),
-            owner_email: formData.get('owner_email'),
-            tags: formData.get('tags').split(',').map(tag => tag.trim()).filter(tag => tag),
-            status: 'PENDING', // All new listings start as pending
-            featured: false,
-            created_at: new Date().toISOString()
-        };
+        const form = e.target;
+        const formData = new FormData(form);
 
-        const listings = this.getListings();
-        listings.push(newListing);
-        this.saveListings(listings);
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Uploading...';
+        submitBtn.disabled = true;
 
-        this.showNotification('Listing submitted for review! It will appear after admin approval.', 'success');
-        this.resetCreateForm();
-        this.loadPage('browse');
+        try {
+            const response = await fetch('/api/resources', {
+                method: 'POST',
+                body: formData // FormData automatically sets correct Content-Type
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Add to local storage for demo purposes
+                const listings = this.getListings();
+                listings.push(result.resource);
+                this.saveListings(listings);
+
+                this.showNotification('Resource submitted successfully! 📚', 'success');
+                this.resetCreateForm();
+                this.loadPage('browse');
+            } else {
+                this.showNotification(result.message || 'Failed to submit resource.', 'error');
+            }
+        } catch (error) {
+            console.error('Form submission error:', error);
+            this.showNotification('Error submitting resource. Please try again.', 'error');
+        } finally {
+            // Reset button state
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
     }
 
     handleRequestSubmit(e) {
@@ -780,7 +882,7 @@ class SwapShelfApp {
         this.closeModal();
     }
 
-    // Modal management
+    // Modal management - UPDATED with image support
     viewListing(id) {
         const listing = this.getListing(id);
         if (!listing) return;
@@ -790,6 +892,25 @@ class SwapShelfApp {
         const content = document.getElementById('modal-content');
 
         title.textContent = listing.title;
+
+        // Create image gallery if images exist
+        let imagesHTML = '';
+        if (listing.images && listing.images.length > 0) {
+            imagesHTML = `
+                <div class="listing-images">
+                    <h4>Images</h4>
+                    <div class="image-gallery">
+                        ${listing.images.map((src, index) => `
+                            <img src="${src}" 
+                                 alt="Image ${index + 1} for ${listing.title}" 
+                                 class="listing-image-thumbnail"
+                                 onclick="app.openLightbox('${listing.id}', ${index})">
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         content.innerHTML = `
             <div class="listing-detail">
                 <div class="listing-detail-header">
@@ -814,6 +935,7 @@ class SwapShelfApp {
                         <div class="meta-value status status--${listing.status.toLowerCase() === 'published' ? 'success' : 'warning'}">${listing.status}</div>
                     </div>
                 </div>
+                ${imagesHTML}
                 <div class="listing-detail-description">
                     <h3>Description</h3>
                     <p>${listing.description}</p>
@@ -834,6 +956,59 @@ class SwapShelfApp {
         modal.classList.remove('hidden');
     }
 
+    // NEW: Image lightbox functionality
+    openLightbox(listingId, imageIndex) {
+        const listing = this.getListing(listingId);
+        if (!listing || !listing.images || listing.images.length === 0) return;
+
+        this.currentLightboxImages = listing.images;
+        this.currentLightboxIndex = imageIndex;
+
+        const lightbox = document.getElementById('image-lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        
+        lightboxImage.src = this.currentLightboxImages[imageIndex];
+        lightboxImage.alt = `Image ${imageIndex + 1} of ${listing.title}`;
+        
+        // Show/hide navigation buttons
+        const prevBtn = document.getElementById('lightbox-prev');
+        const nextBtn = document.getElementById('lightbox-next');
+        prevBtn.style.display = this.currentLightboxImages.length > 1 ? 'block' : 'none';
+        nextBtn.style.display = this.currentLightboxImages.length > 1 ? 'block' : 'none';
+        
+        lightbox.classList.remove('hidden');
+        
+        // Close modal to avoid conflict
+        this.closeModal();
+    }
+
+    // NEW: Lightbox navigation
+    prevImage() {
+        if (this.currentLightboxIndex > 0) {
+            this.currentLightboxIndex--;
+        } else {
+            this.currentLightboxIndex = this.currentLightboxImages.length - 1;
+        }
+        document.getElementById('lightbox-image').src = this.currentLightboxImages[this.currentLightboxIndex];
+    }
+
+    nextImage() {
+        if (this.currentLightboxIndex < this.currentLightboxImages.length - 1) {
+            this.currentLightboxIndex++;
+        } else {
+            this.currentLightboxIndex = 0;
+        }
+        document.getElementById('lightbox-image').src = this.currentLightboxImages[this.currentLightboxIndex];
+    }
+
+    // NEW: Close lightbox
+    closeLightbox() {
+        const lightbox = document.getElementById('image-lightbox');
+        lightbox.classList.add('hidden');
+        this.currentLightboxImages = [];
+        this.currentLightboxIndex = 0;
+    }
+
     contactOwner(listingId) {
         const listing = this.getListing(listingId);
         if (!listing) return;
@@ -851,7 +1026,11 @@ class SwapShelfApp {
     }
 
     closeModal() {
-        document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
+        document.querySelectorAll('.modal').forEach(modal => {
+            if (!modal.id.includes('lightbox')) {
+                modal.classList.add('hidden');
+            }
+        });
     }
 
     // Location filter population
