@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwapShelf - Academic Resource Sharing Platform</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <div class="navbar-brand">
+                    <h2>SwapShelf</h2>
+                </div>
+                <div class="navbar-menu">
+                    <a href="#" class="nav-link" data-page="home">Home</a>
+                    <a href="#" class="nav-link" data-page="browse">Browse</a>
+                    <a href="#" class="nav-link" data-page="create">Create Listing</a>
+                    <a href="#" class="nav-link" data-page="about">About</a>
+                    <a href="#" class="nav-link" data-page="support">Support</a>
+                    <a href="#" class="nav-link admin-link" data-page="admin">Admin</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        
+        <!-- Home Page -->
+        <div id="home-page" class="page active">
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="container">
+                    <div class="hero-content">
+                        <h1>Share Academic Resources, Build Community</h1>
+                        <p>Connect with fellow students to exchange textbooks, notes, and study materials. Make learning more affordable and sustainable.</p>
+                        <div class="hero-actions">
+                            <button class="btn btn--primary btn--lg" data-page="browse">Browse Resources</button>
+                            <button class="btn btn--outline btn--lg" data-page="create">Share Your Resources</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <div class="container">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3 id="total-listings">0</h3>
+                            <p>Resources Shared</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="total-books">0</h3>
+                            <p>Books Available</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="total-notes">0</h3>
+                            <p>Study Notes</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="total-locations">0</h3>
+                            <p>Cities</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Listings -->
+            <section class="featured-section">
+                <div class="container">
+                    <h2>Featured Resources</h2>
+                    <div id="featured-listings" class="listings-grid">
+                        <!-- Featured listings will be populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Browse Page -->
+        <div id="browse-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>Browse Resources</h1>
+                    <p>Find textbooks, notes, and study materials from fellow students</p>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="search-filters">
+                    <div class="search-bar">
+                        <input type="text" id="search-input" class="form-control" placeholder="Search by title, author, or subject...">
+                    </div>
+                    <div class="filters">
+                        <select id="type-filter" class="form-control">
+                            <option value="">All Types</option>
+                            <option value="BOOK">Books</option>
+                            <option value="NOTES">Notes</option>
+                        </select>
+                        <select id="condition-filter" class="form-control">
+                            <option value="">All Conditions</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                        <select id="location-filter" class="form-control">
+                            <option value="">All Locations</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Listings -->
+                <div id="browse-listings" class="listings-grid">
+                    <!-- Listings will be populated by JavaScript -->
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <!-- Pagination will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Listing Detail Page -->
+        <div id="listing-detail-page" class="page">
+            <div class="container">
+                <div class="listing-detail">
+                    <!-- Listing details will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Listing Page -->
+        <div id="create-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1 id="form-title">Create New Listing</h1>
+                    <p>Share your textbooks and study materials with the community</p>
+                </div>
+
+                <div class="form-container">
+                    <form id="listing-form" class="listing-form">
+                        <input type="hidden" id="listing-id" value="">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="listing-type">Resource Type *</label>
+                            <select id="listing-type" class="form-control" required>
+                                <option value="">Select type</option>
+                                <option value="BOOK">Book</option>
+                                <option value="NOTES">Notes</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="listing-title">Title *</label>
+                            <input type="text" id="listing-title" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="listing-author-subject">Author/Subject *</label>
+                            <input type="text" id="listing-author-subject" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="listing-description">Description *</label>
+                            <textarea id="listing-description" class="form-control" rows="4" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="listing-condition">Condition *</label>
+                            <select id="listing-condition" class="form-control" required>
+                                <option value="">Select condition</option>
+                                <option value="Excellent">Excellent</option>
+                                <option value="Good">Good</option>
+                                <option value="Fair">Fair</option>
+                                <option value="Poor">Poor</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="listing-location">Location *</label>
+                            <input type="text" id="listing-location" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="listing-email">Contact Email *</label>
+                            <input type="email" id="listing-email" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="listing-tags">Tags (comma-separated)</label>
+                            <input type="text" id="listing-tags" class="form-control" placeholder="e.g., Computer Science, Algorithms, Textbook">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" id="listing-featured"> Mark as featured
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary">Create Listing</button>
+                            <button type="button" class="btn btn--outline" id="cancel-btn" data-page="browse">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Page -->
+        <div id="admin-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>Admin Dashboard</h1>
+                    <p>Manage listings and platform settings</p>
+                </div>
+
+                <div class="admin-stats">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3 id="admin-total-listings">0</h3>
+                            <p>Total Listings</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="admin-published-listings">0</h3>
+                            <p>Published</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="admin-pending-listings">0</h3>
+                            <p>Pending Review</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="admin-reported-listings">0</h3>
+                            <p>Reported</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-content">
+                    <div class="admin-filters">
+                        <select id="admin-status-filter" class="form-control">
+                            <option value="">All Status</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="REPORTED">Reported</option>
+                        </select>
+                    </div>
+
+                    <div id="admin-listings" class="admin-listings">
+                        <!-- Admin listings will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div id="about-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>About SwapShelf</h1>
+                    <p>Connecting students through academic resource sharing</p>
+                </div>
+
+                <div class="about-content">
+                    <div class="about-section">
+                        <h2>Our Mission</h2>
+                        <p>SwapShelf is designed to make academic resources more accessible and affordable for students. We believe in the power of community and sharing to reduce the financial burden of education while promoting sustainability.</p>
+                    </div>
+
+                    <div class="about-section">
+                        <h2>How It Works</h2>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <h3>1. Share</h3>
+                                <p>List your textbooks, notes, and study materials that you no longer need.</p>
+                            </div>
+                            <div class="step-card">
+                                <h3>2. Browse</h3>
+                                <p>Search for resources you need using our advanced filtering system.</p>
+                            </div>
+                            <div class="step-card">
+                                <h3>3. Connect</h3>
+                                <p>Contact resource owners directly to arrange exchanges or purchases.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-section">
+                        <h2>Community Guidelines</h2>
+                        <ul>
+                            <li>Be honest about the condition of your items</li>
+                            <li>Respond promptly to inquiries</li>
+                            <li>Meet in safe, public locations for exchanges</li>
+                            <li>Report any inappropriate behavior</li>
+                            <li>Respect intellectual property rights</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support Page -->
+        <div id="support-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>Support SwapShelf</h1>
+                    <p>Help us maintain and improve the platform</p>
+                </div>
+
+                <div class="support-content">
+                    <div class="support-section">
+                        <h2>Why Support Us?</h2>
+                        <p>SwapShelf is a community-driven platform that relies on support from users like you. Your contributions help us:</p>
+                        <ul>
+                            <li>Maintain server infrastructure</li>
+                            <li>Develop new features</li>
+                            <li>Provide customer support</li>
+                            <li>Keep the platform free for students</li>
+                        </ul>
+                    </div>
+
+                    <div class="support-section">
+                        <h2>Ways to Help</h2>
+                        <div class="help-methods">
+                            <div class="help-card">
+                                <h3>Donate</h3>
+                                <p>Make a one-time or recurring donation to support our operations.</p>
+                                <button class="btn btn--primary">Donate Now</button>
+                            </div>
+                            <div class="help-card">
+                                <h3>Spread the Word</h3>
+                                <p>Share SwapShelf with your classmates and study groups.</p>
+                                <button class="btn btn--outline">Share</button>
+                            </div>
+                            <div class="help-card">
+                                <h3>Provide Feedback</h3>
+                                <p>Help us improve by reporting bugs and suggesting features.</p>
+                                <button class="btn btn--outline">Contact Us</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Listing Detail Modal -->
+    <div id="listing-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Modal -->
+    <div id="request-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Request Resource</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="request-form">
+                    <div class="form-group">
+                        <label class="form-label" for="requester-name">Your Name *</label>
+                        <input type="text" id="requester-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="requester-email">Your Email *</label>
+                        <input type="email" id="requester-email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="request-message">Message</label>
+                        <textarea id="request-message" class="form-control" rows="4" placeholder="Tell the owner why you need this resource..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn--primary">Send Request</button>
+                        <button type="button" class="btn btn--outline modal-close">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification hidden">
+        <span id="notification-message"></span>
+        <button id="notification-close">&times;</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

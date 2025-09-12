@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SwapShelf - Academic Resource Exchange</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="navbar-logo">
+                <!-- <span class="logo-icon">📚</span> -->
+                <!-- <span class="logo-text">SwapShelf</span> -->
+            </div>
+            <!-- <div class="navbar-brand">
+                <a href="#" data-page="home" class="brand-link">
+                    <span class="logo-icon">📚</span>
+                    <span class="logo-text">SwapShelf</span>
+                </a>
+            </div> -->
+            <ul class="navbar-menu">
+                <li><a class="nav-link active" data-page="home" href="#">Home</a></li>
+                <li><a class="nav-link" data-page="browse" href="#">Browse</a></li>
+                <li><a class="nav-link" data-page="create" href="#">Share Resource</a></li>
+                <li><a class="nav-link" data-page="about" href="#">About</a></li>
+                <li><a class="nav-link" data-page="support" href="#">Support</a></li>
+                <!-- Admin and Logout links will be injected by JS if admin -->
+            </ul>
+            <button class="navbar-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">SwapShelf</h1>
+                    <p class="hero-description">Connect with fellow students to exchange textbooks, notes, and study materials. Make learning more affordable and sustainable.</p>
+                    
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-listings">0</div>
+                            <div class="stat-label">Resources Shared</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-books">0</div>
+                            <div class="stat-label">Books Available</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-notes">0</div>
+                            <div class="stat-label">Study Notes</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-locations">0</div>
+                            <div class="stat-label">Cities</div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        <button class="btn btn--primary" data-page="browse">Find Resources</button>
+                        <button class="btn btn--outline" data-page="create">Share Resource</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Home Page Content -->
+        <div id="home-page" class="page active">
+            <!-- Featured Listings -->
+            <section class="featured-section">
+                <div class="container">
+                    <h2 class="section-title">Featured Resources</h2>
+                    <div id="featured-listings" class="listings-grid">
+                        <div class="loading">Loading featured resources...</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Browse Page -->
+        <div id="browse-page" class="page">
+            <section class="browse-section">
+                <div class="container">
+                    <h2 class="page-title">Browse Resources</h2>
+                    
+                    <div class="filters">
+                        <input type="text" id="search-input" class="form-input" placeholder="Search by title, author, or keyword...">
+                        
+                        <select id="type-filter" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="BOOK">Books</option>
+                            <option value="NOTES">Notes</option>
+                        </select>
+                        
+                        <select id="condition-filter" class="form-select">
+                            <option value="">All Conditions</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                        </select>
+                        
+                        <select id="location-filter" class="form-select">
+                            <option value="">All Locations</option>
+                        </select>
+                    </div>
+
+                    <div id="browse-listings" class="listings-grid">
+                        <div class="loading">Loading resources...</div>
+                    </div>
+                    
+                    <div id="pagination" class="pagination"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Create Listing Page -->
+        <div id="create-page" class="page">
+            <section class="create-section">
+                <div class="container">
+                    <h2 class="page-title">Share Your Resource</h2>
+                    
+                    <form id="listing-form" class="listing-form">
+                        <!-- NEW: ISBN Lookup Section -->
+                        <div class="isbn-lookup-section">
+                            <h3>Quick Fill for Books (Optional)</h3>
+                            <p class="isbn-description">Enter an ISBN to automatically fill book details:</p>
+                            <div class="isbn-input-group">
+                                <input 
+                                    type="text" 
+                                    id="isbn" 
+                                    name="isbn" 
+                                    class="form-input isbn-input" 
+                                    placeholder="Enter ISBN (e.g., 9780262033848)" 
+                                    maxlength="17"
+                                >
+                                <button type="button" id="isbn-lookup-btn" class="btn btn--secondary">
+                                     Lookup Book
+                                </button>
+                            </div>
+                            <div class="isbn-help">
+                                <small>You can find the ISBN on the back of your book near the barcode.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-separator"></div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="type" class="form-label">Resource Type *</label>
+                                <select id="type" name="type" class="form-select" required>
+                                    <option value="">Select type</option>
+                                    <option value="BOOK">Book</option>
+                                    <option value="NOTES">Study Notes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="condition" class="form-label">Condition *</label>
+                                <select id="condition" name="condition" class="form-select" required>
+                                    <option value="">Select condition</option>
+                                    <option value="Excellent">Excellent</option>
+                                    <option value="Good">Good</option>
+                                    <option value="Fair">Fair</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="title" class="form-label">Title *</label>
+                            <input type="text" id="title" name="title" class="form-input" placeholder="Enter the title" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="author_subject" class="form-label">Author/Subject *</label>
+                            <input type="text" id="author_subject" name="author_subject" class="form-input" placeholder="Enter author name or subject" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="form-label">Description *</label>
+                            <textarea id="description" name="description" class="form-textarea" rows="4" placeholder="Describe the condition, contents, and any other relevant details" required></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location" class="form-label">Location *</label>
+                                <input type="text" id="location" name="location" class="form-input" placeholder="City, State" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="owner_email" class="form-label">Your Email *</label>
+                                <input type="email" id="owner_email" name="owner_email" class="form-input" placeholder="your.email@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tags" class="form-label">Tags (Optional)</label>
+                            <input type="text" id="tags" name="tags" class="form-input" placeholder="e.g., Computer Science, Programming, Java (comma-separated)">
+                            <small class="form-help">Separate tags with commas to help others find your resource</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary">Submit for Review</button>
+                            <button type="button" class="btn btn--outline" onclick="app.resetCreateForm()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <!-- About Page -->
+        <div id="about-page" class="page">
+            <section class="about-section">
+                <div class="container">
+                    <h2 class="page-title">About SwapShelf</h2>
+                    <div class="about-content">
+                        <div class="about-text">
+                            <h3>Connecting students through academic resource sharing</h3>
+                            <p>SwapShelf is designed to make academic resources more accessible and affordable for students. We believe in the power of community and sharing to reduce the financial burden of education while promoting sustainability.</p>
+                        </div>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <div class="feature-icon">📚</div>
+                                <h4>Share Resources</h4>
+                                <p>List your textbooks, notes, and study materials that you no longer need.</p>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🔍</div>
+                                <h4>Find What You Need</h4>
+                                <p>Search for resources you need using our advanced filtering system.</p>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🤝</div>
+                                <h4>Connect Directly</h4>
+                                <p>Contact resource owners directly to arrange exchanges or purchases.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Support Page -->
+        <div id="support-page" class="page">
+            <section class="support-section">
+                <div class="container">
+                    <h2 class="page-title">Support SwapShelf</h2>
+                    <div class="support-content">
+                        <h3>Help us maintain and improve the platform</h3>
+                        <div class="support-options">
+                            <div class="support-item">
+                                <h4>Donate</h4>
+                                <p>Make a one-time or recurring donation to support our operations.</p>
+                                <button class="btn btn--success" onclick="document.getElementById('donate-modal').classList.remove('hidden')">Donate Now</button>
+                            </div>
+                            <div class="support-item">
+                                <h4>Spread the Word</h4>
+                                <p>Share SwapShelf with your classmates and study groups.</p>
+                                <button class="btn btn--primary" onclick="navigator.share ? navigator.share({title: 'SwapShelf', text: 'Check out SwapShelf for academic resource exchange!', url: window.location.origin}) : alert('Copy and share: ' + window.location.origin)">Share</button>
+                            </div>
+                            <div class="support-item">
+                                <h4>Report Issues</h4>
+                                <p>Help us improve by reporting bugs and suggesting features.</p>
+                                <button class="btn btn--error" onclick="window.open('mailto:swapshelf.support@gmail.com?subject=SwapShelf%20Issue%20Report', '_blank')">Report Issue</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Admin Page -->
+        <div id="admin-page" class="page">
+            <section class="admin-section">
+                <div class="container">
+                    <h2 class="page-title">Admin Dashboard</h2>
+                    <p class="page-subtitle">Manage listings and platform settings</p>
+                    <div class="admin-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="admin-total-listings">0</div>
+                            <div class="stat-label">Total Listings</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="admin-published-listings">0</div>
+                            <div class="stat-label">Published</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="admin-pending-listings">0</div>
+                            <div class="stat-label">Pending Review</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="admin-reported-listings">0</div>
+                            <div class="stat-label">Reported</div>
+                        </div>
+                    </div>
+                    <div class="admin-filters">
+                        <label for="admin-status-filter">Filter by Status:</label>
+                        <select id="admin-status-filter" class="form-select">
+                            <option value="">All Statuses</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="REPORTED">Reported</option>
+                        </select>
+                    </div>
+                    <div id="admin-listings-container" class="admin-listings">
+                        <div class="loading">Loading admin listings...</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <!-- Donate Modal Popup -->
+    <div id="donate-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="document.getElementById('donate-modal').classList.add('hidden')"></div>
+        <div class="modal-content" style="max-width:400px;">
+            <div class="modal-header">
+                <h2>Donate via UPI</h2>
+                <button class="modal-close" onclick="document.getElementById('donate-modal').classList.add('hidden')">×</button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <img src="/images/upi-qr.png" alt="UPI QR Code" style="width:220px;max-width:100%;margin-bottom:16px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+                <div style="font-size:18px;font-weight:500;margin-bottom:8px;">UPI ID:</div>
+                <div style="font-size:16px;color:#21808d;font-weight:600;user-select:all;">haziqargar42-1@okhdfcbank</div>
+                <p style="margin-top:16px;color:#666;font-size:14px;">Scan the QR code or use the UPI ID above to donate. Thank you for supporting SwapShelf!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals and Notification (same as the previous file) -->
+    <div id="listing-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="app.closeModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Resource Details</h2>
+                <button class="modal-close" onclick="app.closeModal()">×</button>
+            </div>
+            <div id="modal-content" class="modal-body">
+                <!-- Listing details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Contact Resource Owner</h2>
+                <button class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="request-form">
+                    <input type="hidden" id="contact-listing-id" name="listing_id">
+                    
+                    <div class="form-group">
+                        <label for="requester-name" class="form-label">Your Name *</label>
+                        <input type="text" id="requester-name" name="requester_name" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requester-email" class="form-label">Your Email *</label>
+                        <input type="email" id="requester-email" name="requester_email" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="requester-phone" class="form-label">Phone Number</label>
+                        <input type="tel" id="requester-phone" name="requester_phone" class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="request-message" class="form-label">Message *</label>
+                        <textarea id="request-message" name="message" class="form-textarea" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn--primary">Send Request</button>
+                        <button type="button" class="btn btn--outline" onclick="app.closeModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-login-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Admin Login</h2>
+                <button class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="admin-login-form">
+                    <div class="form-group">
+                        <label for="admin-username" class="form-label">Username</label>
+                        <input type="text" id="admin-username" name="username" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="admin-password" class="form-label">Password</label>
+                        <input type="password" id="admin-password" name="password" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn--primary">Login</button>
+                        <button type="button" class="btn btn--outline" onclick="app.closeModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification hidden">
+        <div class="notification-content">
+            <span id="notification-message">Notification message</span>
+            <button id="notification-close" class="notification-close">×</button>
+        </div>
+    </div>
+    
+    <!-- <footer>
+        <div class="container">
+            <p style="color:#6b7280; text-align:center; font-size:14px; margin:40px 0 10px;">&copy; 2025 SwapShelf. All rights reserved. | Built for students by students.</p>
+        </div>
+    </footer> -->
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
