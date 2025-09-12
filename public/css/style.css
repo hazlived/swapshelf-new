@@ -450,6 +450,8 @@ pre code {
 
 .btn--outline:hover {
   background: var(--color-secondary);
+  color: white !important;
+  font-weight: normal !important;
 }
 
 .btn--sm {
@@ -1629,7 +1631,7 @@ select.form-control {
   font-family: "FKGroteskNeue", "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  color: white;
   letter-spacing: 0.04em;
   margin-right: 0;
   text-shadow: 0 2px 8px rgba(var(--color-primary-hover), 0.08);
@@ -3675,7 +3677,7 @@ select.form-control {
 /* Image Upload and Preview Styles */
 .image-input {
     padding: var(--space-12);
-    border: 2px dashed var(--color-border);
+    border: 2px dashed white;
     border-radius: var(--radius-base);
     background: var(--color-background);
     cursor: pointer;
@@ -3683,13 +3685,13 @@ select.form-control {
 }
 
 .image-input:hover {
-    border-color: var(--color-primary);
-    background: var(--color-bg-1);
+    border-color: white;
+    background: rgb(137, 137, 137)
 }
 
 .image-input:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: white;
     box-shadow: var(--focus-ring);
 }
 

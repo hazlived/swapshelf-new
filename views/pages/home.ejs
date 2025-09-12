@@ -12,7 +12,7 @@
             <div class="container">
                 <div class="navbar-content">
                     <div class="navbar-logo">
-                        <span class="logo-icon">📚</span>
+                        <!-- <span class="logo-icon">📚</span> -->
                         <span class="logo-text">SwapShelf</span>
                     </div>
                     <ul class="navbar-menu">
@@ -258,14 +258,17 @@
                             <div class="support-item">
                                 <h4>💝 Donate</h4>
                                 <p>Make a one-time or recurring donation to support our operations.</p>
+                                <button class="btn btn--primary" onclick="document.getElementById('donate-modal').classList.remove('hidden')">Donate</button>
                             </div>
                             <div class="support-item">
                                 <h4>📢 Spread the Word</h4>
                                 <p>Share SwapShelf with your classmates and study groups.</p>
+                                <button class="btn btn--outline" onclick="navigator.share ? navigator.share({title: 'SwapShelf', text: 'Check out SwapShelf for academic resource sharing!', url: window.location.href}) : alert('Copy and share this link: ' + window.location.href)">Share</button>
                             </div>
                             <div class="support-item">
                                 <h4>🐛 Report Issues</h4>
                                 <p>Help us improve by reporting bugs and suggesting features.</p>
+                                <button class="btn btn--error" onclick="window.open('mailto:support@swapshelf.com?subject=SwapShelf%20Bug%20Report', '_blank')">Report an Issue</button>
                             </div>
                         </div>
                     </div>
@@ -423,5 +426,22 @@
     </footer>
 
     <script src="/js/app.js"></script>
+
+    <!-- Donate Modal -->
+    <div id="donate-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="document.getElementById('donate-modal').classList.add('hidden')"></div>
+        <div class="modal-content" style="max-width:400px;">
+            <div class="modal-header">
+                <h2>Support SwapShelf</h2>
+                <button class="modal-close" onclick="document.getElementById('donate-modal').classList.add('hidden')">×</button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p>Scan the UPI QR code below or use the UPI ID to donate:</p>
+                <img src="/images/upi-qr.png" alt="UPI QR Code" style="width:220px; margin:16px auto; display:block;">
+                <div style="font-size:18px; margin:12px 0; font-weight:bold;">UPI ID: <span style="color:#2563eb">haziqzargar42-1@okhdfcbank</span></div>
+                <small style="color:#6b7280;">Thank you for supporting SwapShelf!</small>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
