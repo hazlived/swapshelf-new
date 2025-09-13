@@ -1,5 +1,69 @@
 // SwapShelf Application JavaScript
 class SwapShelfApp {
+
+
+    openContactModal(resource) {
+  document.getElementById('owner_email').value = resource.owner_email;
+  document.getElementById('resource_title').value = resource.title;
+
+  const modal = document.getElementById('contact-modal'); // Use your actual modal ID
+  if (modal) {
+    modal.classList.remove('hidden'); // Or appropriate code to show your modal
+  }
+}
+        // Prompt user for details and send request email to resource owner
+        // async sendRequestEmail(owner_email, resource_title) {
+        //     const requester_name = prompt("Enter your name:");
+        //     if (!requester_name) return;
+
+        //     const requester_email = prompt("Enter your email:");
+        //     if (!requester_email) return;
+
+        //     const message = prompt("Enter your message:");
+        //     if (!message) return;
+
+        //     try {
+        //         const response = await fetch('/api/send-request-email', {
+        //             method: 'POST',
+        //             headers: { 'Content-Type': 'application/json' },
+        //             body: JSON.stringify({
+        //                 owner_email,
+        //                 requester_name,
+        //                 requester_email,
+        //                 message,
+        //                 resource_title
+        //             })
+        //         });
+        //         const data = await response.json();
+        //         if (data.success) {
+        //             this.showNotification('Request sent successfully!', 'success');
+        //         } else {
+        //             this.showNotification('Failed to send request email.', 'error');
+        //         }
+        //     } catch (err) {
+        //         console.error(err);
+        //         this.showNotification('Error sending request email.', 'error');
+        //     }
+        // }
+    // Send request email to resource owner via backend
+    async sendRequestEmail(owner_email, requester_name, requester_email, message, resource_title) {
+        try {
+            const response = await fetch('/api/send-request-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ owner_email, requester_name, requester_email, message, resource_title })
+            });
+            const data = await response.json();
+            if (data.success) {
+                this.showNotification('Request sent successfully!', 'success');
+            } else {
+                this.showNotification('Failed to send request email.', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            this.showNotification('Error sending request email.', 'error');
+        }
+    }
     // Toggle featured status for a listing
     toggleFeaturedListing(id) {
         const listings = this.getListings();
@@ -213,14 +277,15 @@ class SwapShelfApp {
         if (locationFilter) locationFilter.addEventListener('change', () => this.filterListings());
         if (adminStatusFilter) adminStatusFilter.addEventListener('change', () => this.loadAdminListings());
 
-        // Forms
-        const listingForm = document.getElementById('listing-form');
-        const requestForm = document.getElementById('request-form');
-        const adminLoginForm = document.getElementById('admin-login-form');
+    // Forms
+    const listingForm = document.getElementById('listing-form');
+    const requestForm = document.getElementById('request-form');
+    const adminLoginForm = document.getElementById('admin-login-form');
 
-        if (listingForm) listingForm.addEventListener('submit', (e) => this.handleListingSubmit(e));
-        if (requestForm) requestForm.addEventListener('submit', (e) => this.handleRequestSubmit(e));
-        if (adminLoginForm) adminLoginForm.addEventListener('submit', (e) => this.handleAdminLogin(e));
+    if (listingForm) listingForm.addEventListener('submit', (e) => this.handleListingSubmit(e));
+    const requestFormEl = document.getElementById('request-form');
+    if (requestFormEl) requestFormEl.addEventListener('submit', (e) => this.handleRequestSubmit(e));
+    if (adminLoginForm) adminLoginForm.addEventListener('submit', (e) => this.handleAdminLogin(e));
 
         // ISBN lookup functionality
         const isbnInput = document.getElementById('isbn');
@@ -492,6 +557,36 @@ class SwapShelfApp {
     formatDate(dateString) {
         return new Date(dateString).toLocaleDateString();
     }
+
+        /**
+         * Check a title for flagged keywords to auto-approve or defer for review.
+         * @param {string} title
+         * @returns {{status: 'APPROVED'|'PENDING', reason?: string}}
+         */
+        automatedApprovalCheck(title) {
+            const inappropriateKeywords = [
+                'scam', 'spam', 'explicit', 'profanity', 'violence',
+                'hate speech', 'illegal', 'counterfeit', 'porn', 'rape', 'incest',
+                'abuse', 'drugs', 'murder', 'assassination', 'bomb', 'terrorist',
+                'suicide', 'obscene', 'vulgar', 'fraud', 'weapon', 'gun', 'knife',
+                'torture', 'slavery', 'exploitation', 'corruption', 'racism',
+                'homophobia', 'child abuse', 'molestation', 'harassment',
+                'bullying', 'extremism', 'propaganda', 'smuggling',
+                'piracy', 'prostitution', 'human trafficking', 'bribery',
+                'extortion', 'deception'
+            ];
+            const lowerTitle = title.toLowerCase();
+            for (const keyword of inappropriateKeywords) {
+                // Use simple substring match for single words and phrases
+                if (lowerTitle.includes(keyword)) {
+                    return {
+                        status: 'PENDING',
+                        reason: `Flagged for review due to “${keyword}.”`
+                    };
+                }
+            }
+            return { status: 'APPROVED' };
+        }
 
     // Data management
     getListings() {
@@ -839,6 +934,10 @@ class SwapShelfApp {
         const form = e.target;
         const formData = new FormData(form);
 
+        // automated approval check
+        const title = formData.get('title');
+        const approvalResult = this.automatedApprovalCheck(title);
+
         // Show loading state
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
@@ -851,20 +950,42 @@ class SwapShelfApp {
                 body: formData // FormData automatically sets correct Content-Type
             });
 
+            const newResource = {
+                id: this.generateId(),
+                type: formData.get('type'),
+                title: formData.get('title'),
+                author_subject: formData.get('author_subject'),
+                description: formData.get('description'),
+                condition: formData.get('condition'),
+                location: formData.get('location'),
+                owner_email: formData.get('owner_email'),
+                tags: formData.get('tags') ? formData.get('tags').split(',').map(t => t.trim()) : [],
+                featured: false,
+                images: [], // You may want to handle image upload separately
+                created_at: new Date().toISOString()
+            };
+
             const result = await response.json();
 
-            if (result.success) {
-                // Add to local storage for demo purposes
-                const listings = this.getListings();
-                listings.push(result.resource);
-                this.saveListings(listings);
-
-                this.showNotification('Resource submitted successfully! 📚', 'success');
-                this.resetCreateForm();
-                this.loadPage('browse');
+            if (approvalResult.status === 'APPROVED') {
+                newResource.status = 'PUBLISHED';
+                this.showNotification('Resource published successfully!', 'success');
             } else {
-                this.showNotification(result.message || 'Failed to submit resource.', 'error');
+                newResource.status = 'PENDING';
+                this.showNotification(
+                    approvalResult.reason + ' An admin will review it shortly.',
+                    'warning'
+                );
             }
+            // --- End automated logic ---
+
+            // Save to local storage for demo purposes
+            const listings = this.getListings();
+            listings.push(newResource);
+            this.saveListings(listings);
+
+            this.resetCreateForm();
+            this.loadPage('browse');
         } catch (error) {
             console.error('Form submission error:', error);
             this.showNotification('Error submitting resource. Please try again.', 'error');
@@ -875,12 +996,25 @@ class SwapShelfApp {
         }
     }
 
-    handleRequestSubmit(e) {
-        e.preventDefault();
-        // In a real app, this would send an email or notification
-        this.showNotification('Request sent successfully!', 'success');
-        this.closeModal();
-    }
+    async handleRequestSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const ownerEmail = formData.get('owner_email');        // snake_case keys from form
+    const resourceTitle = formData.get('resource_title');
+
+    // Prompt user for requester name/email/message as needed, or get from inputs
+    const requesterName = formData.get('requester_name');
+    const requesterEmail = formData.get('requester_email');
+    const message = formData.get('message');
+
+    // Call your sendRequestEmail with matching snake_case names
+    await this.sendRequestEmail(ownerEmail, requesterName, requesterEmail, message, resourceTitle);
+
+    this.closeModal();
+    form.reset();
+}
 
     // Modal management - UPDATED with image support
     viewListing(id) {

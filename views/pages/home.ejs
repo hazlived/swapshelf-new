@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>SwapShelf - Academic Resource Exchange</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -341,6 +342,9 @@
             <div class="modal-body">
                 <form id="request-form">
                     <input type="hidden" id="contact-listing-id" name="listing_id">
+                    <!-- Hidden fields set dynamically with JavaScript -->
+                    <input type="hidden" name="owner_email" id="owner_email" value="" />
+                    <input type="hidden" name="resource_title" id="resource_title" value="" />
                     
                     <div class="form-group">
                         <label for="requester-name" class="form-label">Your Name *</label>
@@ -363,7 +367,7 @@
                     </div>
                     
                     <div class="form-actions">
-                        <button type="submit" class="btn btn--primary">Send Request</button>
+                        <button type="submit" onclick="app.openContactModal(yourResourceObject)" class="btn btn--primary">Send Request</button>
                         <button type="button" class="btn btn--outline" onclick="app.closeModal()">Cancel</button>
                     </div>
                 </form>

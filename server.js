@@ -1,12 +1,19 @@
+require('dotenv').config();
+
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
 const dotenv = require('dotenv');
 const multer = require('multer');
+
 const { adminAuth, verifyAdminCredentials } = require('./middleware/auth');
 
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 dotenv.config();
+console.log('Loaded SendGrid API key:', process.env.SENDGRID_API_KEY);
 const app = express();
 
 // Ensure uploads directory exists
@@ -50,7 +57,6 @@ app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
     next();
 });
-
 // Routes
 app.get('/', (req, res) => res.render('pages/home', { isAdmin: req.session?.isAdmin || false }));
 
@@ -134,6 +140,48 @@ app.use((err, req, res, next) => {
         return res.status(400).json({ success:false, message: err.message });
     }
     res.status(500).json({ success:false, message:'Server error' });
+});
+    app.post('/api/send-request-email', async (req, res) => {
+          console.log('Received send-request-email:', req.body);
+
+const { owner_email, requester_name, requester_email, message, resource_title } = req.body;
+  if (!owner_email || !requester_name || !requester_email || !message || !resource_title) {
+    return res.status(400).json({ success: false, message: 'Missing required fields' });
+  }
+
+  const email = {
+    to: owner_email,
+    from: 'namkeenbiskoot@gmail.com', // Verified SendGrid sender
+    replyTo: requester_email,
+    subject: `SwapShelf Request for "${resourceTitle}"`,
+    text: `
+Hello,
+
+You have a new request for your resource "${resourceTitle}".
+Requester: ${requester_name} <${requester_email}>
+Message:
+${message}
+
+Please reply directly to the requester.
+
+Regards,
+SwapShelf Team
+    `,
+  };
+
+  // === Insert logging block here ===
+  try {
+    console.log('Sending email via SendGrid...');
+    await sgMail.send(email);
+    console.log('SendGrid email sent successfully');
+    return res.json({ success: true, message: 'Request email sent successfully' });
+  } catch (error) {
+    console.error('SendGrid sending error:', error);
+    if (error.response) {
+      console.error('SendGrid response error:', error.response.body);
+    }
+    return res.status(500).json({ success: false, message: 'Failed to send email' });
+  }
 });
 
 // Start
